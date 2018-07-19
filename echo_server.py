@@ -1,5 +1,5 @@
 import socket
-import sys
+import sys,traceback
 
 
 def server(log_buffer=sys.stderr):
@@ -31,62 +31,32 @@ def server(log_buffer=sys.stderr):
         # server will handle each incoming connection one at a time.
         while True:
             print('waiting for a connection', file=log_buffer)
-
-            # TODO: make a new socket when a client connects, call it 'conn',
-            #       at the same time you should be able to get the address of
-            #       the client so we can report it below.  Replace the
-            #       following line with your code. It is only here to prevent
-            #       syntax errors
             conn, addr = sock.accept()
             try:
                 print('connection - {0}:{1}'.format(*addr), file=log_buffer)
 
-                # the inner loop will receive messages sent by the client in
-                # buffers.  When a complete message has been received, the
-                # loop will exit
                 while True:
-                    # TODO: receive 16 bytes of data from the client. Store
-                    #       the data you receive as 'data'.  Replace the
-                    #       following line with your code.  It's only here as
-                    #       a placeholder to prevent an error in string
-                    #       formatting
-                    buffer_size = 16
-                    received = conn.recv(buffer_size)
+                    data =conn.recv(16)
+                    print('received "{0}"'.format(data.decode('utf8')))
 
-                    print('received "{0}"'.format(received.decode('utf8')))
+                    conn.sendall(data)
+                    print('sent "{0}"'.format(data.decode("utf8")))
 
-                    # TODO: Send the data you received back to the client, log
-                    # the fact using the print statement here.  It will help in
-                    # debugging problems.
-                    conn.sendall(b"this is only a test")
-                    print('sent "{0}"'.format(received.decode('utf8')))
-                    
-                    # TODO: Check here to see whether you have received the end
-                    # of the message. If you have, then break from the `while True`
-                    # loop.
-                    # 
-                    # Figuring out whether or not you have received the end of the
-                    # message is a trick we learned in the lesson: if you don't
-                    # remember then ask your classmates or instructor for a clue.
-                    # :)
+                    if len(data) < 16:
+                        break
 
+            except:
+                traceback.print_exc()
 
             finally:
-                # TODO: When the inner loop exits, this 'finally' clause will
-                #       be hit. Use that opportunity to close the socket you
-                #       created above when a client connected.
-                sock.close()
-                print(
-                    'echo complete, client connection closed', file=log_buffer
-                )
+
+                conn.close()
+                print('echo complete, client connection closed', file=log_buffer)
 
     except KeyboardInterrupt:
-        # TODO: Use the python KeyboardInterrupt exception as a signal to
-        #       close the server socket and exit from the server function.
-        #       Replace the call to `pass` below, which is only there to
-        #       prevent syntax problems
-        pass
-        print('quitting echo server', file=log_buffer
+        sock.close()
+
+
 if __name__ == '__main__':
     server()
     sys.exit(0)

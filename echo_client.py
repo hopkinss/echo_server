@@ -1,12 +1,23 @@
 import socket
+import sys
 
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_IP)
-client_socket.connect(("127.0.0.1", 10000))
+def client(msg,log_buffer=sys.stderr):
+    server_address=('localhost',10000)
+    sock = socket.socket()
+    sock.connect(server_address)
 
-my_message = input("> ")
-client_socket.sendall(my_message.encode('utf-8'))
+    recieve_message=''
 
-received_message = client_socket.recv(4096)
-print("Server says: {}".format(received_message.decode()))
+    try:
+        print('sending "{0}"'.format(msg),file=log_buffer)
+        sock.sendall(msg.encode())
+        chunk=sock.recv(16)
+        recieve_message += chunk
 
-client_socket.close()
+    except:
+        pass
+
+if __name__=='__main__':
+    client(sys.argv[1])
+
+
